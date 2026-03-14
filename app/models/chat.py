@@ -1,7 +1,7 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import WebSocket
-from app.constants.message_enum import MessageType
+from app.constants.app_enum import MessageType, RoleEnums
 
 #  chat rooms stores all conversation locally on server
 class ChatRoom:
@@ -20,13 +20,13 @@ class ChartData(BaseModel):
 
 #  Message data/content
 class Content(BaseModel):
-    data: ChartData | str | None = None
+    data: ChartData | str
 
 #  chat messages model
 class ChatMessage (BaseModel):
     id: str
-    type: MessageType
-    role: str # ai or client
-    data: Content | None = None
-    created_at: datetime
+    type: MessageType = MessageType.query
+    role: RoleEnums
+    data: Content | str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 

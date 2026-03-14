@@ -13,8 +13,7 @@ async def chat_ws(ws: WebSocket):
     await ws.send_json({"room_id": f"{room_id}"}) 
     try: 
         while True:
-            rawQuery = await ws.receive_text()
-            ai_res = await route_intent(rawQuery)
-            await ws.send_text(ai_res)
+            data = await ws.receive_json()
+            await manager.handleReceiver(ws,data)
     except WebSocketDisconnect: 
         print("ws disconnect")
