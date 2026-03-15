@@ -1,6 +1,6 @@
 from app.services.gemini_client import ask_llm
 from app.agents.sql_agent import SQLAgent
-from app.models.chat import ChatMessage
+from app.models.chat import ChatMessage, ChatRoom
 import uuid
 from app.constants.app_enum import RoleEnums, ProgressStatus, MessageType
 
@@ -8,8 +8,8 @@ class ExplanationAgent:
     def __init__(self):
         self.sql_agent = SQLAgent()
 
-    async def handle(self, query: str):
-        sql = await self.sql_agent.generate_sql(query,False)
+    async def handle(self, query: str, room: ChatRoom):
+        sql = await self.sql_agent.generate_sql(query,False, room=room)
         data = await self.sql_agent.execute(sql)
 
         persona = """"
@@ -41,7 +41,7 @@ class ExplanationAgent:
         Return a short clear explanation in plain text.
         """
         prompt = persona + system_prompt + user_prompt + output_format
-        res =  await ask_llm(prompt)
+        res =  await ask_llm(prompt, room)
         return ChatMessage(
             id= str(uuid.uuid4()),
             role=RoleEnums.assistent,

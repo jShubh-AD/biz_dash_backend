@@ -1,5 +1,5 @@
 from app.agents.sql_agent import SQLAgent
-from app.models.chat import ChartData, ChatMessage
+from app.models.chat import ChartData, ChatMessage, ChatRoom
 from app.constants.app_enum import MessageType, RoleEnums
 import uuid
 
@@ -8,8 +8,8 @@ class ChartAgent:
     def __init__(self):
         self.sql_agent = SQLAgent()
 
-    async def handle(self, query: str):
-        sql = await self.sql_agent.generate_sql(query, True)
+    async def handle(self, query: str, room: ChatRoom):
+        sql = await self.sql_agent.generate_sql(query, True, room=room)
         rows, cols = await self.sql_agent.execute(sql)
         labels, values = zip(*rows) if rows else ([], [])
         cols = list(cols)

@@ -1,9 +1,7 @@
 from fastapi import WebSocket, APIRouter, WebSocketDisconnect
-from app.agents.intent_router import route_intent
-from app.api.ws.manager import WsManager
+from app.api.ws.manager import manager
 
 router = APIRouter()
-manager = WsManager()
 
 @router.websocket('/chat')
 async def chat_ws(ws: WebSocket):

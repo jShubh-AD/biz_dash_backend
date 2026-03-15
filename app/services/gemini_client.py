@@ -1,14 +1,14 @@
-from google import genai
-import os
-from dotenv import load_dotenv
+from app.models.chat import ChatRoom
 
-load_dotenv()
+async def ask_llm(prompt: str, room: ChatRoom) -> str:
+    if not room.api_key:
+        raise Exception("API key not configured for this room")
+    
+    if not room.client:
+        raise Exception("AI model not configured for this room")
 
-client = genai.Client(api_key=os.getenv("GEMINI_TEST_KEY"))
-
-async def ask_llm(prompt: str) -> str:
-    response = client.models.generate_content(
-        model="models/gemini-2.5-flash-lite",
+    response = room.client.models.generate_content(
+        model=f"models/{room.ai_model}",
         contents=prompt,
         config={
             "temperature": 0,
@@ -17,4 +17,5 @@ async def ask_llm(prompt: str) -> str:
             "max_output_tokens": 200,
         }
     )
+
     return response.text.strip()

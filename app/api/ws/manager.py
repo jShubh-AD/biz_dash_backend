@@ -22,6 +22,8 @@ class WsManager:
                 self.rooms[room_id].user = ws
             return room_id
         except Exception as e:
+            await ws.send_json({"status":ProgressStatus.error, "data": str(e)})  
+            ws.close()
             print(e)
 
     #  handle receive json
@@ -63,13 +65,17 @@ class WsManager:
         match msg.type:
             case MessageType.query:
                 agent = ExplanationAgent()
-                response = await agent.handle(query=msg.data)
+                response = await agent.handle(query=msg.data, room= room)
                 return response
             case MessageType.chart:
                 agent = ChartAgent()
-                response = await agent.handle(query=msg.data)
+                response = await agent.handle(query=msg.data, room= room)
                 return response
             case MessageType.explanation:
                 agent = ExplanationAgent()
-                response = await agent.handle(query=msg.data)
+                response = await agent.handle(query=msg.data, room= room)
                 return response
+            
+
+
+manager = WsManager()

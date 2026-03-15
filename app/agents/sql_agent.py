@@ -1,11 +1,12 @@
 from app.services.gemini_client import ask_llm
 from app.services.db_service import run_query
 from app.services.schema_service import SCHEMA
+from app.models.chat import ChatRoom
 import re
 
 class SQLAgent:
 
-    async def generate_sql(self, query: str, is_chart: bool):
+    async def generate_sql(self, query: str, is_chart: bool, room: ChatRoom):
         system_prompt = f"""
             You are a senior BI engineer that converts natural language to PostgreSQL.
             and help user reach the answeer to their questions.
@@ -46,7 +47,7 @@ class SQLAgent:
             """
 
         prompt = system_prompt + user_prompt + output
-        response = (await ask_llm(prompt)).strip()
+        response = (await ask_llm(prompt, room)).strip()
         return self.clean_sql(response)
 
     def clean_sql(self,sql: str):
