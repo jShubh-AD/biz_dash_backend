@@ -11,6 +11,7 @@ views (integer)
 likes (integer)
 comments (integer)
 shares (integer)
-sentiment_scores (double precision)
+duration_sec (integer)
+sentiment_score (double precision)
 ads_enabled (boolean)
 """
