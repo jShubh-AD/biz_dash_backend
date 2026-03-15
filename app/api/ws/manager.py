@@ -1,6 +1,6 @@
 from fastapi import WebSocket, WebSocketDisconnect
 from app.constants.app_enum import RoleEnums, MessageType, ProgressStatus
-from app.models.chat import ChatRoom, ChatMessage, ChartData, Content
+from app.models.chat import ChatRoom, ChatMessage, ChartData
 import uuid
 from app.api.ws.helper import WsHelper
 from app.agents.chart_agent import ChartAgent
@@ -36,10 +36,10 @@ class WsManager:
             msg = self._create_message(data)
             room.messages.append(msg)
 
-            response = await self._route_message(room, msg, ws)
+            response = await self._route_message(room, msg)
             room.messages.append(response)
 
-            await ws.send_json({"status":ProgressStatus.successs, "data": str(response.data)})     
+            await ws.send_json({"status":ProgressStatus.successs, "data": response.model_dump()})     
 
         except Exception as e:
            await ws.send_json({"status":ProgressStatus.error, "data": str(e)})    
@@ -55,18 +55,21 @@ class WsManager:
         return ChatMessage(
             id=str(uuid.uuid4()),
             role=RoleEnums.client,
-            type=data["type"],
+            type = data.get("type", MessageType.query),
             data=data["data"]
         )
     
-    async def _route_message(self, room : ChatRoom, msg : ChatMessage, ws: WebSocket):
+    async def _route_message(self, room : ChatRoom, msg : ChatMessage):
         match msg.type:
             case MessageType.query:
                 agent = ExplanationAgent()
                 response = await agent.handle(query=msg.data)
                 return response
             case MessageType.chart:
-                print("send to make cahrt")
-            case MessageType.error:
-                await ws.send_json({"status": ProgressStatus.error})
-                print("some error occurred")
+                agent = ChartAgent()
+                response = await agent.handle(query=msg.data)
+                return response
+            case MessageType.explanation:
+                agent = ExplanationAgent()
+                response = await agent.handle(query=msg.data)
+                return response

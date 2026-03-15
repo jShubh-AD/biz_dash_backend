@@ -15,18 +15,15 @@ class ChatRoom:
 
 # chats model
 class ChartData(BaseModel):
-    labels: list[str]
-    values: list[int]
-
-#  Message data/content
-class Content(BaseModel):
-    data: ChartData | str
+    labels: list[str | int | float]
+    values: list[int | float]
+    x_axis: str
+    y_axis: str
 
 #  chat messages model
 class ChatMessage (BaseModel):
     id: str
     type: MessageType = MessageType.query
     role: RoleEnums
-    data: Content | str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    data: ChartData | str
 
