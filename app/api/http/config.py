@@ -32,3 +32,14 @@ async def getRoomConfig(room_id: str):
           api_key=room.api_key
       ).model_dump()
     }
+
+@router.delete("/rooms/{room_id}")
+async def deleteRoom(room_id: str):
+    room = manager.rooms.get(room_id)
+    if not room: return HTTPException(status_code=400, detail="No room or incorrect room_id")
+    manager.rooms.pop(room_id, None)
+    return {
+      "success": True,
+      "status": 200,
+      "message": "Config fetched successfully",
+    }
