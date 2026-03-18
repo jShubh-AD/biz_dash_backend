@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.api.ws.chat import router as chat_router
 from app.api.http.config import router as config_router
+from app.api.http.upload_data import router as upload_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -20,9 +21,10 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+@app.get("/",tags=['HEALTH'])
 def health_check():
     return {"status": "ok"}
 
 app.include_router(chat_router, prefix='/ws')
-app.include_router(config_router, prefix='/config')
+app.include_router(config_router, prefix='/config',tags=['CONFIG'])
+app.include_router(upload_router,prefix='/upload', tags=['UPLOAD'])
