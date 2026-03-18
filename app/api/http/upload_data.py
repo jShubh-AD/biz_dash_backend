@@ -1,0 +1,44 @@
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
+from app.db.session import engine
+from app.api.http.dependencies.room_id import validate_room
+from app.api.ws.manager import manager
+from app.utils.csv_cleaner import clean_columns
+import os
+from dotenv import load_dotenv
+import pandas as pd
+from app.utils.csv_loader import copy_to_postgres
+
+load_dotenv()
+
+router = APIRouter()
+
+Max_Size = int(os.getenv('MAX_CSV_SIZE'))
+Chunk_Size = int(os.getenv('CHUNK_SIZE'))
+Max_Row = int(os.getenv('MAX_ROWS'))
+
+@router.post('/csv/{room_id}')
+async def uplaod_csv(
+    room = Depends(validate_room),
+    file: UploadFile = File(...),
+    ):
+
+     # validate file
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(400, "Only CSV allowed")
+    
+    contents = await file.read()
+
+    if len(contents) > Max_Size:
+        raise HTTPException(400, "File too large")
+    
+    try:
+        df = pd.read_csv(pd.io.common.BytesIO(contents))
+    except Exception as e:
+        print(e)
+        raise HTTPException(400, "Invalid CSV")
+
+    if len(df) > Max_Row:
+        raise HTTPException(400, "Too many rows")
+    
+    # clean
+    df.columns = clean_columns(df.columns)
