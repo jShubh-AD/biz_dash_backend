@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.api.ws.chat import router as chat_router
-from app.api.http.config import router as config_router
-from app.api.http.upload_data import router as upload_router
+from app.api.http.routes.config import router as config_router
+from app.api.http.routes.upload_data import router as upload_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
