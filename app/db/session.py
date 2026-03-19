@@ -8,13 +8,14 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
+SessionLocal = sessionmaker(
+    bind=engine,
+    autocommit=False,
+    autoflush=False
+)
 
 def get_db():
-    db = SessionLocal(
-        autocommit=False,
-        autoflush=False,
-    )
+    db = SessionLocal()
     try:
         yield db
     finally:

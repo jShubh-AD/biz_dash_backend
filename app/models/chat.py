@@ -41,7 +41,7 @@ class ChatRoom:
         self.client: genai.Client | None = None
         self.user= user
         self.have_db: bool = False
-        self.table_name: str
+        self.table_name: str | None = None
         self.schema: Schema = Schema()
         self.context: list[ChatMessage] = []
         self.created_at = datetime.utcnow()
