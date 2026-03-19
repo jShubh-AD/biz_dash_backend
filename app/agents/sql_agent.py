@@ -2,35 +2,86 @@ from app.services.gemini_client import ask_llm
 from app.services.db_service import run_query
 from app.services.schema_service import SCHEMA
 from app.models.chat import ChatRoom
+import logging
+import time
+from app.utils.logger import get_logger
 import re
 
 class SQLAgent:
+    logger = get_logger("sql_agent")
 
     async def generate_sql(self, query: str, is_chart: bool, room: ChatRoom):
         system_prompt = f"""
-            You are a senior BI engineer that converts natural language to PostgreSQL.
-            and help user reach the answeer to their questions.
+            You are a senior BI engineer generating PostgreSQL queries.
 
+           Rules:
+           - ONLY SELECT
+           - Use ONLY given schema
+           - ALWAYS LIMIT 50 unless speified otherwise
+           - Prefer simple queries over complex joins
+           - Use aggregation when needed (SUM, COUNT, AVG)
+           - Use GROUP BY when aggregating
+           - Use ORDER BY for time/date columns
+           - Handle NULLs using COALESCE
+           - Alias columns clearly
+
+            DATA TYPE HANDLING (CRITICAL):
+            - All columns are stored as TEXT
+            - You MUST infer correct types
             Rules:
-            - Only SELECT queries
-            - No INSERT/UPDATE/DELETE
-            - Use only provided schema
-            - Return SQL only
+            - Numeric → CAST(NULLIF(column, '') AS FLOAT)
+            - Integer → CAST(NULLIF(column, '') AS INTEGER)
+            - Date → CAST(column AS DATE)
 
-            Schema:
-            {SCHEMA}
+            - ALWAYS cast before:
+                - SUM / AVG
+                - comparisons
+                - ORDER BY
+
+            - NEVER perform operations on raw TEXT
+
+            CRITICAL:
+            - ALWAYS use EXACT table name: {room.table_name}
+            - DO NOT guess or modify table name
+
+            SCHEMA:
+            - ALWAYS use EXACT columns name: {room.schema.columns}
+            - DO NOT guess or modify column name
+
+            SAMPLE DATA:
+            {room.schema.sample}
             """
 
         chart_rule = """
-            IMPORTANT (highest priority):
+            CHART DATA SHAPE RULES (CRITICAL):
+            Detect intent and return correct structure:
 
-            If a chart is requested:
-            - The query MUST return exactly TWO columns.
-            - Column 1: categorical label (text/category/time).
-            - Column 2: numeric value (integer/float).
-            - ALWAYS aggregate numeric values (SUM, COUNT, AVG etc.).
-            - ALWAYS use GROUP BY on the label column.
-            - Do NOT return more than two columns.
+            1. SINGLE VALUE:
+            - 1 column (numeric, aggregated)
+
+            2. CATEGORY/TIME COMPARISON:
+            - 2 columns:
+                - label (category/date)
+                - value (aggregated numeric)
+            - MUST GROUP BY label
+
+            3. MULTI-SERIES:
+            - 3 columns:
+                - x-axis (time/category)
+                - series (category)
+                - value (aggregated)
+            - MUST GROUP BY all non-aggregated columns
+
+            4. RELATIONSHIP:
+            - 2 numeric columns
+            - NO aggregation
+            - NO GROUP BY
+
+            5. DISTRIBUTION:
+            - 1 numeric column
+            - NO aggregation
+
+            - Use ORDER BY for time
             """ if is_chart else """
             Return rows that directly answer the question.
         """
@@ -47,8 +98,10 @@ class SQLAgent:
             """
 
         prompt = system_prompt + user_prompt + output
-        response = (await ask_llm(prompt, room)).strip()
-        return self.clean_sql(response)
+        response = (await ask_llm(prompt, room)).strip() 
+        clean_sql = self.clean_sql(response)
+        self.logger.info(f"[room:{room.room_id}] FINAL_SQL: {clean_sql}")
+        return clean_sql
 
     def clean_sql(self,sql: str):
         sql = re.sub(r"```sql\s*", "", sql)

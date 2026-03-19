@@ -3,9 +3,16 @@ from app.api.ws.chat import router as chat_router
 from app.api.http.routes.config import router as config_router
 from app.api.http.routes.upload_data import router as upload_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.utils.logger import setup_logging
+import logging
 
+setup_logging()
+
+logger = logging.getLogger("app")
 
 app = FastAPI()
+
+logger.info("Application initialized")
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,6 +26,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup():
+    logger.info("App startup complete")
 
 
 @app.get("/",tags=['HEALTH'])

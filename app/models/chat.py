@@ -6,10 +6,15 @@ from app.constants.app_enum import MessageType, RoleEnums
 from app.models.room_config import ALLOWED_MODELS
 from google import genai
 
-# chats model
+class Dataset(BaseModel):
+    label: str
+    data: list[float | int]
+
 class ChartData(BaseModel):
+    chart_type: str
+    reason: str
     labels: list[str | int | float]
-    values: list[int | float]
+    datasets: list[Dataset]
     x_axis: str
     y_axis: str
 
