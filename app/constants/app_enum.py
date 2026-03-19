@@ -6,7 +6,9 @@ class MessageType (str,Enum):
     reply='reply'
     chart='chart'
     error = 'error'
-    test='test'
+    test_query='test_query'
+    test_chart='test_chart'
+
 
 class RoleEnums (str, Enum):
     client='client'

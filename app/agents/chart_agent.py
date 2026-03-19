@@ -22,5 +22,6 @@ class ChartAgent:
                     y_axis = cols[1]
                 ).model_dump(),
             type=MessageType.chart,
+            sql_query=sql,
             role=RoleEnums.assistent
         )

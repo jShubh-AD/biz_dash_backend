@@ -35,6 +35,7 @@ class ChatRoom:
         self.api_key: str | None = None
         self.client: genai.Client | None = None
         self.user= user
+        self.have_db: bool = False
         self.table_name: str
         self.schema: Schema = Schema()
         self.context: list[ChatMessage] = []

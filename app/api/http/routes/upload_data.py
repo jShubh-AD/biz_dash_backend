@@ -52,14 +52,17 @@ async def uplaod_csv(
         room.table_name = table_name
         room.schema.columns = list(df.columns)
         room.schema.sample = df.head(5).to_dict()
+        room.have_db= True
 
         return {
             "success": True,
             "table_name": table_name,
             "columns": room.schema.columns,
+            'have_db':True,
             "rows": len(df)
         }
     except HTTPException as e:
+        print(e)
         raise e
 
     except Exception as e:
