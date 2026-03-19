@@ -7,7 +7,7 @@ def setup_logging():
         formatter = ColoredFormatter(
         "%(log_color)s%(asctime)s | %(levelname)s | %(name)s | %(message)s",
         log_colors={
-            "DEBUG": "cyan",
+            "DEBUG": "cyan", 
             "INFO": "green",
             "WARNING": "yellow",
             "ERROR": "red",
