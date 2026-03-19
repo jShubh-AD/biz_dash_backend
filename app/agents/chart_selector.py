@@ -52,13 +52,9 @@ class ChartSelectorAgent:
         try:
             cleaned = re.sub(r"```json\s*", "", response)
             cleaned = re.sub(r"```", "", cleaned).strip()
-            data = json.loads(response.strip())
+            data = json.loads(cleaned.strip())
             logger.info(f"[room:{room.room_id}] PARSED: {data}")
-            if data.get("chart_type") not in [
-               "bar","line","pie","scatter","histogram","area","kpi","table"
-            ]:
-              logger.warning(f"[room:{room.room_id}] INVALID TYPE: {data}")
-              return {"chart_type": "table", "reason": "fallback"}
+            return data
         except:
             logger.exception(f"[room:{room.room_id}] JSON PARSE FAILED")
             return {"chart_type": "table", "reason": "fallback"}
