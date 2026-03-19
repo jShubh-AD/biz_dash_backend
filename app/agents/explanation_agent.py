@@ -44,6 +44,7 @@ class ExplanationAgent:
         res =  await ask_llm(prompt, room)
         return ChatMessage(
             id= str(uuid.uuid4()),
+            sql_query=sql,
             role=RoleEnums.assistent,
             type=MessageType.explanation,
             data=res

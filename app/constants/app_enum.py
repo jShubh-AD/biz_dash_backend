@@ -1,11 +1,12 @@
 from enum import Enum
 
 class MessageType (str,Enum):
-    query= "query"
-    explanation = "explanation"
+    query= 'query'
+    explanation = 'explanation'
     reply='reply'
     chart='chart'
-    error = "error"
+    error = 'error'
+    test='test'
 
 class RoleEnums (str, Enum):
     client='client'

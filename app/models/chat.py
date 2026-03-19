@@ -17,6 +17,7 @@ class ChartData(BaseModel):
 class ChatMessage (BaseModel):
     id: str
     type: MessageType = MessageType.query
+    sql_query: str | None = None
     role: RoleEnums
     data: ChartData | str
 

@@ -43,7 +43,7 @@ async def delete_room(room : ChatRoom = Depends(validate_room)):
     }
 
 
-@router.get("/models}")
+@router.get("/models")
 async def get_room_models():
     return {
       "success": True,
