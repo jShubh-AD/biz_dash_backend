@@ -2,7 +2,7 @@ from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
 from app.db.session import engine
 from app.api.http.dependencies.room_id import validate_room
 from app.api.ws.manager import manager
-from app.utils.csv_cleaner import clean_columns
+from app.utils.csv_cleaner import clean_columns, detect_date_format
 from app.models.chat import ChatRoom, Schema
 import os
 from dotenv import load_dotenv
@@ -49,6 +49,15 @@ async def uplaod_csv(
         # clean columns
         df.columns = clean_columns(df.columns)
         df = df.drop_duplicates()
+
+        date_meta = {}
+
+        for col in df.columns:
+            fmt = detect_date_format(df[col])
+            if fmt:
+                date_meta[col] = fmt
+
+        room.schema.date_formats = date_meta
 
         table_name = f"room_{str(room.room_id).replace('-', '_')}"
         copy_to_postgres(df,table_name,engine)

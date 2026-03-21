@@ -90,7 +90,13 @@ class WsManager:
                 guard = await self.check_have_db(room)
                 if guard:
                     return guard
-                await self.check_have_db(room)
+                agent = ExplanationAgent()
+                response = await agent.handle(query=msg.data, room= room)
+                return response
+            case MessageType.reply:
+                guard = await self.check_have_db(room)
+                if guard:
+                    return guard
                 agent = ExplanationAgent()
                 response = await agent.handle(query=msg.data, room= room)
                 return response

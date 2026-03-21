@@ -30,6 +30,7 @@ class ChatMessage (BaseModel):
 class Schema (BaseModel):
     columns: list[str]=[]
     sample: dict[str,Any] = {}
+    date_formats: dict[str,Any]={}
 
 #  chat rooms stores all conversation locally on server
 class ChatRoom:

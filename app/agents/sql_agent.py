@@ -31,7 +31,15 @@ class SQLAgent:
             Rules:
             - Numeric → CAST(NULLIF(column, '') AS FLOAT)
             - Integer → CAST(NULLIF(column, '') AS INTEGER)
-            - Date → CAST(column AS DATE)
+            DATE FORMATS:
+                {room.schema.date_formats}
+            - If column in DATE FORMATS:
+                - If ISO → column::timestamp
+                - Else → TO_TIMESTAMP(column, format)
+            - NEVER use CAST(column AS DATE)
+            - Always use provided DATE FORMATS
+            - Do NOT guess date format
+
 
             - ALWAYS cast before:
                 - SUM / AVG

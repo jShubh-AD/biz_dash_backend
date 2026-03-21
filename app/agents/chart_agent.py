@@ -26,7 +26,10 @@ class ChartAgent:
             labels = list(range(len(rows)))
 
         elif len(cols) == 2:
-            labels = [r[0] for r in rows]
+            labels = [
+                r[0].strftime("%Y-%m-%d") if hasattr(r[0], "strftime") else str(r[0])
+                for r in rows
+            ]
             datasets = [Dataset(label=cols[1], data=[float(r[1] or 0) for r in rows])]
 
         elif len(cols) == 3:
@@ -34,10 +37,16 @@ class ChartAgent:
             for x, cat, val in rows:
                 grouped.setdefault(cat, []).append((x, float(val or 0)))
 
-            labels = sorted(list(set(r[0] for r in rows)))
+            labels = sorted(list(set(
+                r[0].strftime("%Y-%m-%d") if hasattr(r[0], "strftime") else str(r[0])
+                for r in rows
+            )))
 
             for cat, vals in grouped.items():
-                val_map = dict(vals)
+                val_map = {
+                    (k.strftime("%Y-%m-%d") if hasattr(k, "strftime") else str(k)): v
+                    for k, v in vals
+                }
                 datasets.append(
                     Dataset(
                         label=str(cat),

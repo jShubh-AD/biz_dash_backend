@@ -4,6 +4,9 @@ from app.api.http.dependencies.room_id import validate_room
 from app.api.ws.manager import  manager
 from app.models.chat import ChatRoom
 from google import genai
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from app.db.session import get_db
 
 router = APIRouter()
 
@@ -34,7 +37,10 @@ async def get_room_config(room : ChatRoom = Depends(validate_room),):
     }
 
 @router.delete("/rooms/{room_id}")
-async def delete_room(room : ChatRoom = Depends(validate_room)):
+async def delete_room(room : ChatRoom = Depends(validate_room), db : Session = Depends(get_db)):
+    table_name = room.table_name
+    db.execute(text(f'DROP TABLE IF EXISTS "{table_name}"'))
+    db.commit()
     manager.rooms.pop(room.id, None)
     return {
       "success": True,
