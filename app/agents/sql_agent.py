@@ -31,14 +31,18 @@ class SQLAgent:
             Rules:
             - Numeric → CAST(NULLIF(column, '') AS FLOAT)
             - Integer → CAST(NULLIF(column, '') AS INTEGER)
-            DATE FORMATS:
-                {room.schema.date_formats}
-            - If column in DATE FORMATS:
-                - If ISO → column::timestamp
-                - Else → TO_TIMESTAMP(column, format)
-            - NEVER use CAST(column AS DATE)
-            - Always use provided DATE FORMATS
-            - Do NOT guess date format
+           CRITICAL DATE RULE (STRICT):
+                - NEVER use CAST(column AS DATE) or CAST(column AS TIMESTAMP)
+                - This will cause errors and is INVALID
+
+                - If column is in DATE FORMATS:
+                    - MUST use:
+                        TO_TIMESTAMP(column, format)
+
+                - Example (CORRECT):
+                    DATE(TO_TIMESTAMP(issue_reported_at, 'DD/MM/YYYY HH24:MI'))
+
+                - Any use of CAST for date = WRONG OUTPUT
 
 
             - ALWAYS cast before:
@@ -55,6 +59,9 @@ class SQLAgent:
             SCHEMA:
             - ALWAYS use EXACT columns name: {room.schema.columns}
             - DO NOT guess or modify column name
+
+            DATE FORMATS:
+                {room.schema.date_formats}
 
             SAMPLE DATA:
             {room.schema.sample}
